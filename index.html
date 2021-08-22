@@ -1,0 +1,94 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Invaders</title>
+    <style>
+        .avatar{
+        border-radius:50%;
+        }
+        .container{
+        background:white;
+        padding:10px;
+        margin:10px;
+        border-radius:10px;
+        display:flex;
+        gap:16px;
+        align-items:center;
+        }
+        body{
+        background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(99,64,7,0.964005585144214) 21%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
+        }
+
+    </style>
+</head>
+<body>
+    <input class="addusername" placeholder="username"/>
+    <input class="addavatar" placeholder="avatar"/>
+    <button class="adduser" onclick="addUser()">add</button>
+    <section class="user-list">
+    </section>
+
+
+    <script>
+async function getUsers(){
+	const data=await fetch("https://611f2a259771bf001785c7c4.mockapi.io/users",
+ {method:"GET"});
+	const users=await data.json();
+	console.log(users);
+	document.querySelector(".user-list").innerHTML=``;
+	users.forEach((user)=>createUser(user));
+}
+function createUser({avatar,name,createdAt,id}){
+	const info=document.createElement("div");
+	info.setAttribute("class","container");
+	info.innerHTML=`
+	<div class="avatar-container">
+		<img class="avatar" src=${avatar} width="75px"  height="75px"/>
+	</div>
+	<div class="details">
+		<h3>${name}</h3>
+		<p>${new Date(createdAt).toDateString()}</p>
+	</div>
+	<button onclick="deleteUsers(${id})">delete</button>
+  <button onclick="editUser()">Edit</button>
+  <button onclick="updateUser()">Save</button>
+	`;
+document.querySelector(".user-list").append(info);
+}
+getUsers();
+async function deleteUsers(id){
+	const data=await fetch(`https://611f2a259771bf001785c7c4.mockapi.io/users/${id}`,
+	{method:"DELETE"});
+	const users=await data.json();
+	console.log(users);
+  getUsers();
+}
+function addUser(){
+fetch("https://611f2a259771bf001785c7c4.mockapi.io/users",{method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+name:document.querySelector(".addusername").value,
+avatar:document.querySelector(".addavatar").value,
+createdAt:new Date().toISOString()
+})
+})
+.then((data)=>data.json())
+.then((user)=>console.log(user));
+}
+
+function editUser(){
+  const paragraph=document.querySelector(".user-list")
+ paragraph.contentEditable = true;
+  paragraph.style.backgroundColor = "#dddbdb";
+}
+function updateUser(){
+  const paragraph=document.querySelector(".user-list")
+  paragraph.contentEditable = false;
+  paragraph.style.backgroundColor = "#ffe44d";
+}
+</script>
+</body>
